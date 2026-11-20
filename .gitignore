@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+appsettings.*.local.json
+
+# Node / Vite
+node_modules/
+dist/
+*.local
+npm-debug.log*
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

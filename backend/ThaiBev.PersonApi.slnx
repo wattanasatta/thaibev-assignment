@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ThaiBev.PersonApi.Tests/ThaiBev.PersonApi.Tests.csproj" />
+  <Project Path="ThaiBev.PersonApi/ThaiBev.PersonApi.csproj" />
+</Solution>
