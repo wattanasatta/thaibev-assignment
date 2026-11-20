@@ -43,7 +43,7 @@ const emit = defineEmits<{
           <td>{{ formatThaiDate(person.birthDate) }}</td>
           <td class="col-age">{{ person.age }} ปี</td>
           <td class="col-actions">
-            <button type="button" class="btn btn-view" @click="emit('view', person.id, index + 1)">
+            <button type="button" class="btn btn-view" @click="emit('view', person.id)">
               View
             </button>
           </td>

@@ -7,7 +7,6 @@ import BaseModal from './BaseModal.vue'
 
 const props = defineProps<{
   personId: number
-  order: number
 }>()
 
 const emit = defineEmits<{
@@ -43,10 +42,6 @@ onMounted(async () => {
       <div v-else-if="errorMessage" class="banner banner-error">{{ errorMessage }}</div>
 
       <template v-else-if="detail">
-        <div class="field">
-          <label>ลำดับ</label>
-          <input type="text" :value="props.order" disabled />
-        </div>
 
         <div class="field">
           <label>ชื่อ</label>
