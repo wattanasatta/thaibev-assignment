@@ -34,7 +34,7 @@ thaibev-assignment/
 
 | IT 01-1 — หน้ารายการ | IT 01-2 — เพิ่มข้อมูล | IT 01-3 — ดูรายละเอียด |
 |---|---|---|
-| ![IT 01-1 หน้ารายการ](docs/screenshots/it-01-1-list.png) | ![IT 01-2 เพิ่มข้อมูล](docs/screenshots/it-01-2-add.png) | ![IT 01-3 ดูรายละเอียด](docs/screenshots/it-01-3-view.png) |
+| <img width="1418" height="834" alt="image" src="https://github.com/user-attachments/assets/a5bfc9a5-c848-4fc2-88cf-e596291e422e" /> | <img width="1251" height="820" alt="image" src="https://github.com/user-attachments/assets/5cbfc9d7-01be-424f-bcf8-60a0f99e30ca" /> | <img width="1234" height="830" alt="image" src="https://github.com/user-attachments/assets/be3a16e5-7d7d-4188-bf62-594fcb994421" /> |
 
 ## สิ่งที่ต้องติดตั้ง
 
