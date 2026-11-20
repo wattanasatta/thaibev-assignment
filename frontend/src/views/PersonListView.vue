@@ -9,17 +9,13 @@ import type { PersonDetail } from '../types/person'
 const { persons, loading, errorMessage, fetchAll, appendPerson, createPerson } = usePersons()
 
 const showAddModal = ref(false)
-const viewingPerson = ref<{ id: number; order: number } | null>(null)
+const viewingPersonId = ref<number | null>(null)
 
 onMounted(fetchAll)
 
 function onSaved(detail: PersonDetail): void {
   appendPerson(detail) // ข้อมูลใหม่ไปต่อท้ายตาราง
   showAddModal.value = false
-}
-
-function onView(id: number, order: number): void {
-  viewingPerson.value = { id, order }
 }
 </script>
 
@@ -41,7 +37,7 @@ function onView(id: number, order: number): void {
       <button type="button" class="btn btn-ghost" @click="fetchAll">ลองอีกครั้ง</button>
     </div>
 
-    <PersonTable :persons="persons" :loading="loading" @view="onView" />
+    <PersonTable :persons="persons" :loading="loading" @view="viewingPersonId = $event" />
 
     <!-- IT 01-2: Add modal -->
     <PersonFormModal
@@ -53,10 +49,9 @@ function onView(id: number, order: number): void {
 
     <!-- IT 01-3: View modal -->
     <PersonViewModal
-      v-if="viewingPerson !== null"
-      :person-id="viewingPerson.id"
-      :order="viewingPerson.order"
-      @close="viewingPerson = null"
+      v-if="viewingPersonId !== null"
+      :person-id="viewingPersonId"
+      @close="viewingPersonId = null"
     />
   </div>
 </template>

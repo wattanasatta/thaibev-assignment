@@ -11,6 +11,11 @@ dist/
 *.local
 npm-debug.log*
 
+# Local secrets / environment
+.env
+.env.*
+!.env.example
+
 # IDE
 .vs/
 .vscode/

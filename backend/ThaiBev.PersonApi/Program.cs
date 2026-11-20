@@ -12,9 +12,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddSingleton(TimeProvider.System); // ผ่านเข้า service เพื่อให้ mock เวลาในเทสต์ได้
 
-// CORS: อนุญาตเฉพาะ origin ของ Vue dev server
+// CORS: origin มาจาก config (dev = localhost:5173, prod = ตั้งผ่าน env Cors__AllowedOrigins__0)
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options => options.AddPolicy("frontend", policy =>
-    policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));
+{
+    if (allowedOrigins.Length > 0)
+    {
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+    }
+}));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

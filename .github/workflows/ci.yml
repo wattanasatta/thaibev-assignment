@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend build & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore backend/ThaiBev.PersonApi.slnx
+
+      - name: Build
+        run: dotnet build backend/ThaiBev.PersonApi.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test backend/ThaiBev.PersonApi.slnx --configuration Release --no-build --verbosity normal
+
+  frontend:
+    name: Frontend typecheck, tests & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  database:
+    name: SQL Server startup & API smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Generate ephemeral CI-only DB password
+        run: |
+          password="CiOnly!$(openssl rand -hex 12)A1"
+          echo "MSSQL_SA_PASSWORD=${password}" >> "$GITHUB_ENV"
+          echo "ConnectionStrings__Default=Server=localhost,1433;Database=ThaiBevAssignment;User Id=sa;Password=${password};Encrypt=True;TrustServerCertificate=True" >> "$GITHUB_ENV"
+
+      - name: Start SQL Server (docker compose)
+        run: docker compose -f database/docker-compose.yml up -d --wait
+
+      - name: Build API, start it and smoke test
+        run: |
+          dotnet restore backend/ThaiBev.PersonApi.slnx
+          dotnet build backend/ThaiBev.PersonApi.slnx --configuration Release --no-restore
+
+          ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://localhost:5000 \
+            nohup dotnet run --project backend/ThaiBev.PersonApi --configuration Release \
+              --no-build --no-launch-profile > api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:5000/api/persons -o /tmp/persons.json; then
+              break
+            fi
+            sleep 2
+          done
+
+          if [ ! -s /tmp/persons.json ]; then
+            echo "API did not respond; log:"
+            cat api.log
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import json
+          with open('/tmp/persons.json', encoding='utf-8') as f:
+              rows = json.load(f)
+          assert len(rows) >= 8, f"expected seeded rows, got {len(rows)}"
+          print(f"GET /api/persons -> {len(rows)} rows")
+          PY
+
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/persons/999999)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' \
+            -d '{"firstName":"","lastName":"","birthDate":"2099-01-01","address":""}' \
+            http://localhost:5000/api/persons)" = "400"
+          echo "404 and validation 400 checks passed"
+
+      - name: Stop SQL Server
+        if: always()
+        run: docker compose -f database/docker-compose.yml down -v

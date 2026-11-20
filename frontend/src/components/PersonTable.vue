@@ -8,7 +8,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  view: [id: number, order: number]
+  view: [id: number]
 }>()
 </script>
 
