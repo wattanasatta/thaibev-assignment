@@ -171,21 +171,6 @@ npm run typecheck # vue-tsc
 3. **Database** — start SQL Server 2022 ด้วย Docker Compose (รหัสผ่านสุ่มเฉพาะ CI),
    build + start API, ตรวจ `GET /api/persons` ได้ข้อมูล seed, และเช็ก 404 / validation 400
 
-## Scope / Security Notes
-
-Assignment นี้เจตนาเน้น **List / Create / View** ตามโจทย์:
-
-- **ไม่มี Authentication/Authorization** — ทุก endpoint เข้าถึงได้ถ้าเชื่อมถึง API
-  ก่อน deploy จริงต้องเพิ่ม auth (เช่น OIDC/JWT) และจำกัดสิทธิ์ราย endpoint
-- **ไม่มี Edit/Delete** — View เป็น read-only ตามโจทย์; ถ้าต้องการแก้ไข/ลบต้องเพิ่ม endpoint + สิทธิ์ + audit
-- **ไม่มี Pagination/Filtering** — เหมาะกับข้อมูลน้อยของ assignment; ข้อมูลมากควรเพิ่ม paging/filter ฝั่ง API
-- **Privacy/Retention** — ข้อมูลบุคคลเป็นข้อมูลอ่อนไหว ก่อนใช้จริงต้องกำหนดนโยบายเก็บรักษา,
-  สิทธิ์เข้าถึง, audit log และกระบวนการลบ/ทำ anonymize ให้ชัดเจน
-- `appsettings.Development.json` มีรหัส SQL Server แบบ **development-only** เพื่อให้รัน local ได้ง่าย;
-  production ต้อง override ด้วย `ConnectionStrings__Default` จาก secret manager และห้ามใช้รหัสชุดนี้
-- ห้ามใช้ `v-html` กับข้อมูลจาก user (XSS) — Vue escape ให้โดย default
-- Vite proxy `/api` → `:5000` ใช้ใน dev เท่านั้น; API เปิด CORS ตาม origin ที่ตั้งใน config
-
 ## License
 
 [MIT](LICENSE)
